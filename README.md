@@ -13,7 +13,7 @@ This is a branch of [DDSP_SVC](https://github.com/yxlllc/DDSP-SVC) that adds a M
    * **NOTE:** The zip should be the files themselves, not a folder containing the files
 7. Run "make process" to pre-process the audio
 8. Open a second terminal and run "make tensorboard" to run the Tensorboard
-9. Run "make train-ddps" to train the DDSP model
+9. Run "make train-ddsp" to train the DDSP model
 10. Run "make train-diffusion" to train the Diffusion model
 
 ## 3. Acknowledgements

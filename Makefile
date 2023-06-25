@@ -12,7 +12,7 @@ install: ## Install dependencies (Do everytime you start up a paperspace machine
 	pip install --upgrade pip
 	pip install -r requirements.txt
 	pip install tensorboard tensorflow
-	pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu117 -U
+	pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 -U
 	pip install --upgrade lxml
 	apt-get update
 	apt -y install -qq aria2

@@ -9,7 +9,7 @@ This is a branch of [DDSP_SVC](https://github.com/yxlllc/DDSP-SVC) that adds a M
 4. Run "make files" to download the required files. You will only need to run this once as the files will persist across Paperspace runs
     * This will also create the folder structure, but "make folders" can be run independently if need be
 5. Upload your config files into 'configs/<model_name>'
-6. In the base-level directory upload a .zip of all your audio files, and then run "make extract zip=\<zip\>" (ex. "make extract zip=source.zip") 
+6. In the directory that was cloned in step 1, upload a .zip of all your audio files, and then run "make extract zip=\<zip\>" (ex. "make extract zip=source.zip") 
    * **NOTE:** The zip should be the files themselves, not a folder containing the files
 7. Run "make process" to pre-process the audio
 8. Open a second terminal and run "make tensorboard" to run the Tensorboard

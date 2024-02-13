@@ -6,6 +6,8 @@ import torch.nn as nn
 from torch.nn.utils import weight_norm
 
 from .pcmer import PCmer
+from diffusion.model_conformer_naive import ConformerNaiveEncoder
+
 
 
 def split_to_dict(tensor, tensor_splits):
@@ -26,7 +28,10 @@ class Unit2Control(nn.Module):
             self,
             input_channel,
             n_spk,
-            output_splits):
+            output_splits,
+            use_pitch_aug=False,
+            pcmer_norm=False,
+            use_naive_v2=False):
         super().__init__()
         self.output_splits = output_splits
         self.f0_embed = nn.Linear(1, 256)
@@ -35,6 +40,10 @@ class Unit2Control(nn.Module):
         self.n_spk = n_spk
         if n_spk is not None and n_spk > 1:
             self.spk_embed = nn.Embedding(n_spk, 256)
+        if use_pitch_aug:
+            self.aug_shift_embed = nn.Linear(1, 256, bias=False)
+        else:
+            self.aug_shift_embed = None
             
         # conv in stack
         self.stack = nn.Sequential(
@@ -44,14 +53,25 @@ class Unit2Control(nn.Module):
                 nn.Conv1d(256, 256, 3, 1, 1)) 
 
         # transformer
-        self.decoder = PCmer(
-            num_layers=3,
-            num_heads=8,
-            dim_model=256,
-            dim_keys=256,
-            dim_values=256,
-            residual_dropout=0.1,
-            attention_dropout=0.1)
+        if use_naive_v2:
+            self.decoder = ConformerNaiveEncoder(
+                num_layers=3,
+                num_heads=8,
+                dim_model=256,
+                use_norm=False,
+                conv_only=True,
+                conv_dropout=0,
+                atten_dropout=0.1)
+        else:
+            self.decoder = PCmer(
+                num_layers=3,
+                num_heads=8,
+                dim_model=256,
+                dim_keys=256,
+                dim_values=256,
+                residual_dropout=0.1,
+                attention_dropout=0.1,
+                pcmer_norm=pcmer_norm)
         self.norm = nn.LayerNorm(256)
 
         # out
@@ -59,7 +79,7 @@ class Unit2Control(nn.Module):
         self.dense_out = weight_norm(
             nn.Linear(256, self.n_out))
 
-    def forward(self, units, f0, phase, volume, spk_id = None, spk_mix_dict = None):
+    def forward(self, units, f0, phase, volume, spk_id = None, spk_mix_dict = None, aug_shift = None):
         
         '''
         input: 
@@ -77,10 +97,12 @@ class Unit2Control(nn.Module):
                     x = x + v * self.spk_embed(spk_id_torch - 1)
             else:
                 x = x + self.spk_embed(spk_id - 1)
+        if self.aug_shift_embed is not None and aug_shift is not None:
+            x = x + self.aug_shift_embed(aug_shift / 5)
         x = self.decoder(x)
         x = self.norm(x)
         e = self.dense_out(x)
         controls = split_to_dict(e, self.output_splits)
     
-        return controls 
+        return controls, x
 

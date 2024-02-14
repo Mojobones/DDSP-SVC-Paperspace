@@ -17,7 +17,7 @@ install: ## Install dependencies (Do everytime you start up a paperspace machine
 	apt-get update
 	apt -y install -qq aria2
 
-files: folders ## Download the required files (only do once)
+files: ## Download the required files (only do once)
 	aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://huggingface.co/spaces/Mojobones/base-pt/resolve/main/model_0.pt -d pretrain/contentvec -o checkpoint_best_legacy_500.pt
 	aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://github.com/openvpi/vocoders/releases/download/nsf-hifigan-v1/nsf_hifigan_20221211.zip -d pretrain/nsf_hifigan
 	aria2c --console-log-level=error -c -x 16 -s 16 -k 1M https://github.com/yxlllc/DDSP-SVC/releases/download/5.0/model_0.pt -d exp/diffusion-test
